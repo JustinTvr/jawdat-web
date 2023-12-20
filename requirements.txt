@@ -23,7 +23,6 @@ statsmodels
 matplotlib
 geopandas
 xarray
-PIL
 pandas
 time
 numpy
