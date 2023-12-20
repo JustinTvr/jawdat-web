@@ -29,7 +29,6 @@ imageio
 datetime
 netCDF4
 rasterio
-dateutil
 platform
 requests
 shutil
