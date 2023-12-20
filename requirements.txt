@@ -20,7 +20,6 @@ streamlit_extras
 plotly
 hidrokit
 statsmodels
-os
 matplotlib
 webview
 webbrowser
@@ -28,7 +27,6 @@ subprocess
 geopandas
 xarray
 PIL
-sys
 pandas
 time
 numpy
