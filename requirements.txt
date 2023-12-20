@@ -29,9 +29,7 @@ imageio
 datetime
 netCDF4
 rasterio
-platform
 requests
-shutil
 lmoments3
 scipy
 collections
