@@ -24,7 +24,6 @@ matplotlib
 geopandas
 xarray
 pandas
-time
 numpy
 imageio
 datetime
