@@ -1,4 +1,3 @@
-
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
@@ -31,6 +30,9 @@ from fiona.io import ZipMemoryFile
 from streamlit_folium import folium_static
 from pygwalker.api.streamlit import StreamlitRenderer, init_streamlit_comm
 
+# from st_pages import show_pages_from_config, add_page_title
 
+# show_pages_from_config("pages_sections.toml")
+# add_page_title()
 
-st.write("# Welcome to Streamlit! 👋")
+st.write("# Welcome to Jawdat-Web")
