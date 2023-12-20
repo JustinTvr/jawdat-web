@@ -1,0 +1,44 @@
+[[pages]]
+path = "Main.py"
+name = "Jawdat"
+icon = ":earth_africa:"
+
+[[pages]]
+name = "Satellite Download"
+icon = ":satellite:"
+is_section = true
+
+[[pages]]
+path = "pages/Earthdata.py"
+name = "Earth Data"
+icon = ":partly_sunny_rain:"
+
+[[pages]]
+path = "pages/CMORPH.py"
+name = "CMORPH"
+icon = ":sun_behind_rain_cloud:"
+
+[[pages]]
+name = "Format convertor"
+icon = ":repeat:"
+is_section = true
+
+[[pages]]
+path = "pages/tiff2nc.py"
+name = "Geotiff to netCDF"
+
+[[pages]]
+path = "pages/nc2tiff.py"
+name = "netCDF to Geotiff"
+
+[[pages]]
+path = "pages/netCDF_tools.py"
+name = "netCDF toolkits"
+icon = ":world_map:"
+
+[[pages]]
+path = "pages/EVA.py"
+name = "Extreme Value Analysis"
+icon= ":chart_with_upwards_trend:"
+in_section = false
+
