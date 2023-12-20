@@ -3,6 +3,17 @@ numpy
 pandas
 pydeck
 streamlit
+utm
+pyproj
+seaborn
+folium
+streamlit_folium>=0.11.0
+pygwalker
+pyspark
+streamlit_extras
+plotly
+hidrokit
+statsmodels
 osgeo
 os
 matplotlib
