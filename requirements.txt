@@ -21,9 +21,6 @@ plotly
 hidrokit
 statsmodels
 matplotlib
-webview
-webbrowser
-subprocess
 geopandas
 xarray
 PIL
