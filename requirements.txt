@@ -3,6 +3,11 @@ numpy
 pandas
 pydeck
 streamlit
+streamlit_authenticator
+streamlit_elements
+streamlit_pydantic
+st_pages
+pydantic
 utm
 pyproj
 seaborn
