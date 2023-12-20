@@ -6,6 +6,7 @@ streamlit
 streamlit_authenticator
 streamlit_elements
 streamlit_pydantic
+streamlit_pandas_profiling
 st_pages
 pydantic
 utm
