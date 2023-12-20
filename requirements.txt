@@ -15,3 +15,17 @@ PIL
 sys
 pandas
 time
+numpy
+imageio
+datetime
+netCDF4
+rasterio
+dateutil
+platform
+requests
+shutil
+lmoments3
+scipy
+collections
+shapely
+openpyxl
