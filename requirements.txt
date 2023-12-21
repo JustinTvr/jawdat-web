@@ -53,3 +53,4 @@ bokeh
 h5netcdf>=0.12.0
 cartopy
 geoviews
+datashader
