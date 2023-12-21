@@ -47,3 +47,6 @@ nbserverproxy
 owslib
 palettable
 geemap[extra]
+hvplot
+holoviews
+bokeh
