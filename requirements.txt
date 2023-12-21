@@ -1,3 +1,4 @@
+--find-links=https://girder.github.io/large_image_wheels GDAL
 altair
 numpy
 pandas
@@ -34,3 +35,15 @@ lmoments3
 scipy
 shapely
 openpyxl
+streamlit-bokeh-events
+streamlit-folium
+streamlit-keplergl
+tropycal
+jupyter-server-proxy
+keplergl
+leafmap
+localtileserver
+nbserverproxy
+owslib
+palettable
+geemap[extra]
