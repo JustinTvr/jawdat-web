@@ -32,9 +32,17 @@ path = "pages/nc2tiff.py"
 name = "netCDF to Geotiff"
 
 [[pages]]
+name = "netCDF"
+icon = ":world_map:"
+is_section = true
+
+[[pages]]
+path = "pages/netCDF_viewer.py"
+name = "netCDF viewer"
+
+[[pages]]
 path = "pages/netCDF_tools.py"
 name = "netCDF toolkits"
-icon = ":world_map:"
 
 [[pages]]
 path = "pages/EVA.py"
