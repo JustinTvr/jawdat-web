@@ -1,21 +1,31 @@
-import leafmap.foliumap as leafmap
-import leafmap.colormaps as cm
-import leafmap
 
 import streamlit as st
 from st_pages import add_page_title
 
+import leafmap.foliumap as leafmap
+import leafmap.colormaps as cm
+import leafmap
+
+import hvplot
+import xarray as xr
+import hvplot.pandas  # noqa
+import hvplot.xarray  # noqa
+
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import holoviews as hv
+from holoviews import opts
+# hv.extension('bokeh')
+from bokeh.models import HoverTool
+
 add_page_title()
 
 
-url = 'https://github.com/opengeos/leafmap/raw/master/examples/data/wind_global.nc'
-filename = 'wind_global.nc'
+nc_file = st.file_uploader('Select netCDF file', type=['nc'])
 
-leafmap.download_file(url, output=filename)
-
-data = leafmap.read_netcdf(filename)
-
-
-
+if nc_file is not None:
+    dataset = xr.open_dataset(nc_file)
+    st.code(dataset)
 
 
