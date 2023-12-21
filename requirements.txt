@@ -50,3 +50,4 @@ geemap[extra]
 hvplot
 holoviews
 bokeh
+h5netcdf>=0.12.0
