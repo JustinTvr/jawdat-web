@@ -48,10 +48,10 @@ owslib
 palettable
 geemap[extra]
 holoviews
-bokeh==2.4.3
 h5netcdf>=0.12.0
 cartopy
 datashader
+bokeh
 hvplot
 geoviews
 panel
