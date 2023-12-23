@@ -51,7 +51,6 @@ def use_file_for_hvplot(chart, chart_width=1000,chart_height=500):
     with open("temp.html", 'r', encoding='utf-8') as f:
         html = f.read()
     components.html(html, width=chart_width,height=chart_height, scrolling=True)
-
 st.bokeh_chart = use_file_for_hvplot
 
 # @st.cache_data
@@ -105,7 +104,6 @@ def plot_quad(_dataset,_var, _latitude, _longitude):
 
     st.bokeh_chart(quadmesh_plot)
 
-
 if nc_file is not None:
     file_content = nc_file.read()
 
@@ -136,5 +134,7 @@ if nc_file is not None:
     with col2:
         st.code(dataset.coords)
         st.code(dataset.variables)
+
+
 
 
