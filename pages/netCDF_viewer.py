@@ -75,15 +75,13 @@ def trouver_coords_lat_lon(_nc):
     return lat_coord, lon_coord
 
 # @st.cache_data
-def plot_quad(_dataset,_var, _latitude, _longitude):
-    data = _dataset['t2m']
-
-    st.code(data)
+def plot_quad(_dataset, _var, _latitude, _longitude, _tiles):
+    data = _dataset[_var]
 
     dict_features = {'coastline': '110m'}
 
     quadmesh_plot = data.hvplot.quadmesh(
-        _longitude, _latitude, 't2m',
+        x=_longitude, y=_latitude, z=_var,
         padding=0,
         global_extent=False,
         frame_height=400,
@@ -94,7 +92,7 @@ def plot_quad(_dataset,_var, _latitude, _longitude):
         height = 400,
         features=dict_features,
         # widget_location='bottom',
-        # tiles='ESRI',
+        tiles=_tiles,
         alpha=0.5,
         project=True,
         geo=True,
@@ -117,16 +115,17 @@ if nc_file is not None:
         nc_var = list(dataset.variables)
         nc_var = [x for x in nc_var if x not in nc_coords]
 
-    with st.expander('Plot parameters'):
-        sel_var = st.selectbox('Select the netCDF variables',nc_var)
+        with st.expander('Plot parameters'):
+            sel_var = st.selectbox('Select the netCDF variables',nc_var)
 
-        lat, lon = trouver_coords_lat_lon(dataset)
-        st.text(f'{lat} and {lon} detected as spatial coordinates')
+            lat, lon = trouver_coords_lat_lon(dataset)
+            st.text(f'{lat} and {lon} detected as spatial coordinates')
 
-        # list_tuiles = hv.element.tile_sources.keys()
-        # sel_tiles = st.selectbox('Select tiles',list_tuiles)
+            list_tuiles = list(hv.element.tile_sources.keys())
+            sel_tiles = st.selectbox('Select tiles', list_tuiles[::-1])    
 
-    plot_quad(dataset, sel_var, lat, lon)
+        plot_quad(dataset, sel_var, lat, lon, sel_tiles)
+
 
     col1, col2 = st.columns(2)
     with col1:
