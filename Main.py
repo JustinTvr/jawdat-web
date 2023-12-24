@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(layout="wide")
 import streamlit.components.v1 as components
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
 from streamlit_extras.let_it_rain import rain 
