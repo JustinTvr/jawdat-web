@@ -3,6 +3,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_extras.stateful_button import button
 from streamlit_extras.stoggle import stoggle
+from streamlit_extras.add_vertical_space import add_vertical_space
+from annotated_text import annotated_text
 from st_pages import add_page_title
 
 import leafmap.foliumap as leafmap
@@ -47,18 +49,19 @@ nc_file = st.file_uploader('Select netCDF file', type=['nc'])
 #         data = xr.open_dataset(f)
 #     return data
 
-# @st.cache_resource
-def use_file_for_hvplot(_chart, temp_name,chart_width=1000,chart_height=500):
+# @st.cache_data
+def use_file_for_hvplot(_chart, temp_name,chart_width=1000,chart_height=600):
     if os.path.exists(temp_name):
         os.remove(temp_name)
     
     # Save the hvplot chart to an HTML file
     hvplot.save(_chart,temp_name)
-
     # Display the HTML in Streamlit
-    # with open("temp.html", 'r', encoding='utf-8') as f:
-    #     html = f.read()
-    # components.html(html, width=chart_width,height=chart_height, scrolling=True)
+    with open(temp_name, 'r', encoding='utf-8') as f:
+        html = f.read()
+        # return html
+    components.html(html, width=chart_width,height=chart_height, scrolling=True)
+
 st.bokeh_chart = use_file_for_hvplot
 
 # @st.cache_data
@@ -83,8 +86,12 @@ def trouver_coords_lat_lon(_nc):
     return lat_coord, lon_coord
 
 # @st.cache_data
-def plot_nc(_dataset, _var, _latitude, _longitude, _tiles,_color):
+def plot_nc(_dataset, _var, _latitude, _longitude, _tiles,_color, alpha):
     # st.cache_resource.clear()
+    if alpha == 1.0:
+        rasterize = True
+    else :
+        rasterize = False
     
     data = _dataset[_var]
 
@@ -104,19 +111,15 @@ def plot_nc(_dataset, _var, _latitude, _longitude, _tiles,_color):
         # widget_location='bottom',
         tiles=_tiles,
         cmap=_color,
-        alpha=0.5,
+        alpha=alpha,
         project=True,
         geo=True,
-        rasterize=True,
+        rasterize=rasterize,
         dynamic=False,
     )
 
-    st.bokeh_chart(quadmesh_plot, 'quadmesh.html')
-
-def make_toggle_false():
-    if btn_apply:
-        st.session_state.toggle_nc = False
-
+    return quadmesh_plot
+    # st.bokeh_chart(quadmesh_plot, 'quadmesh.html')
 
 
 if nc_file is not None:
@@ -124,6 +127,8 @@ if nc_file is not None:
 
     @st.cache_data
     def read_nc(file):
+        st.cache_resource.clear()
+
         file_content = file.read()
 
         # Use content hash as the cache key
@@ -153,15 +158,21 @@ if nc_file is not None:
 
 
     with st.expander('Plot parameters'):
+        def disable_apply():
+            st.session_state.button_nc = False
+    
         st.write('Select your parameter and click on apply button')
+        # def disable_apply():
+        #     st.session_state.button_nc = False
 
-        sel_var = st.selectbox('Select the netCDF variables',nc_var)
+        sel_var = st.selectbox('Select the netCDF variables',nc_var, on_change=disable_apply)
 
         lat, lon = trouver_coords_lat_lon(dataset)
         st.text(f'{lat} and {lon} detected as spatial coordinates')
 
         list_tuiles = list(hv.element.tile_sources.keys())
-        sel_tiles = st.selectbox('Select tiles', list_tuiles, index=list_tuiles.index('OpenTopoMap'))    
+        list_tuiles = ['CartoDark', 'CartoEco', 'CartoLight', 'CartoMidnight', 'EsriAntarcticImagery', 'EsriArcticImagery', 'EsriArcticOceanBase', 'EsriArcticOceanReference', 'EsriDelormeWorldBaseMap', 'EsriImagery', 'EsriNatGeo', 'EsriOceanBase', 'EsriOceanReference', 'EsriReference', 'EsriTerrain', 'EsriUSATopo', 'EsriWorldBoundariesAndPlaces', 'EsriWorldBoundariesAndPlacesAlternate', 'EsriWorldDarkGrayBase', 'EsriWorldDarkGrayReference', 'EsriWorldHillshade', 'EsriWorldHillshadeDark', 'EsriWorldLightGrayBase', 'EsriWorldLightGrayReference', 'EsriWorldNavigationCharts', 'EsriWorldPhysical', 'EsriWorldShadedRelief', 'EsriWorldStreetMap', 'EsriWorldTopo', 'EsriWorldTransportation', 'OSM', 'OpenTopoMap']
+        sel_tiles = st.selectbox('Select tiles', list_tuiles, index=list_tuiles.index('OpenTopoMap'), on_change=disable_apply)    
 
         list_colors = list(hv.plotting.list_cmaps())
         id_pr_color = list_colors.index('YlGnBu')
@@ -169,30 +180,43 @@ if nc_file is not None:
         list_potential_temp = ['t2m','tas']
         if ('pr' in sel_var) :
             sel_index = id_pr_color
-        elif id_tas_color in list_potential_temp:
+        elif sel_var in list_potential_temp:
             sel_index = id_tas_color
         else :
             sel_index = list_colors.index('blues')
 
-        sel_color = st.selectbox('Select colors',list_colors, index = sel_index) 
-        stoggle(
-        "Which palette to choose ?",
-        "'YlGnBu' for precipitation data, 'hot_r' for temperature, 'coolwarm' for comparison/bias data\n\
-Add _r to all palette to reverse it")
+        sel_color = st.selectbox('Select colors',list_colors, index = sel_index, on_change=disable_apply) 
+        annotated_text(('YlGnBu','Precipitation',"#8ef"),' | ',
+                       ('hot_r','Temperature',"#faa"),' | ',
+                       ('coolwarm','Bias',"#fea"),' | ',
+                       ('_r','To reverse palette',"#afa"),
+                       )
 
-        btn_apply = st.toggle('Apply', key='toggle_nc')
-        
+#         stoggle(
+#         "Which palette to choose ?",
+#         "'YlGnBu' for precipitation data, 'hot_r' for temperature, 'coolwarm' for comparison/bias data\n\
+# Add _r to all palette to reverse it")
+        add_vertical_space(1)
+
+        alpha_col1, alpha_col2 =st.columns(2)
+        with alpha_col1:
+            choice_alpha = st.toggle('Change transparency ? (plot will not be rasterized anymore)', on_change=disable_apply)
+        if choice_alpha:
+            with alpha_col2:
+                sel_alpha = st.slider('Select transparency',min_value=0.0,max_value=1.0,value=0.7, step=0.1, on_change=disable_apply)
+        else :
+            sel_alpha = 1.0
+        ###########
+        st.divider()
+        btn_apply = st.toggle('Apply', key='button_nc')
 
     if btn_apply:
-        # make_toggle_false()
         with st.spinner('Creating plot...'):
-            plot_nc(dataset, sel_var, lat, lon, sel_tiles, sel_color)
+            output_quad = plot_nc(dataset, sel_var, lat, lon, sel_tiles, sel_color, sel_alpha)
+        with st.spinner('Creating html to display...'):
+            st.bokeh_chart(output_quad, 'quadmesh.html')
+    
 
-        with open("quadmesh.html", 'r', encoding='utf-8') as f:
-            html = f.read()
-        components.html(html, width=1000,height=500, scrolling=True)
-
-        
 ###############################################
 with st.expander('How to reproduce this plot'):
     code = '''
