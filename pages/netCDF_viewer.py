@@ -16,6 +16,9 @@ import xarray as xr
 import hvplot.pandas  # noqa
 import hvplot.xarray  # noqa
 
+import packages.df_function as dff
+import packages.st_dict_input as stdict
+
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -95,28 +98,41 @@ def plot_nc(_dataset, _var, _latitude, _longitude, _tiles,_color, alpha):
     
     data = _dataset[_var]
 
-    dict_features = {'coastline': '110m'}
+    if type(_tiles) == dict :
+        dict_features = _tiles  
+        param_tiles = None
+    else :
+        dict_features = None
+        param_tiles = _tiles
 
-    quadmesh_plot = data.hvplot.quadmesh(
-        x=_longitude, y=_latitude, z=_var,
-        padding=0,
-        global_extent=False,
-        frame_height=400,
-        frame_width=400,
-        max_height = 400,
-        max_width = 400,
-        width=400,
-        height = 400,
-        features=dict_features,
-        # widget_location='bottom',
-        tiles=_tiles,
-        cmap=_color,
-        alpha=alpha,
-        project=True,
-        geo=True,
-        rasterize=rasterize,
-        dynamic=False,
-    )
+    ### For now not working due to hvplot save, same error if 
+    params = {
+        # 'clim': (min_quad, max_quad),
+        'padding': 0,
+        'global_extent': False,
+        'frame_height':400,
+        'frame_width':400,
+        'max_height': 400,
+        'max_width' : 400,
+        'width':400,
+        'height' : 400,
+        # 'cmap': 'viridis',
+        'features': dict_features,
+        # 'widget_location': 'bottom',
+        # 'widget_type': 'scrubber',
+        # 'widgets': {'time': pn.widgets.Select},
+        'alpha': alpha,
+        'cmap': _color,
+        'tiles': param_tiles,
+        'project': True,
+        'geo': True,
+        'rasterize': rasterize,
+        'dynamic': False,
+        # 'projection': ccrs.Orthographic(center_lat, center_lon),
+        # 'projection': ccrs.PlateCarree(),
+    }
+
+    quadmesh_plot = data.hvplot.quadmesh(x=_longitude, y=_latitude, z=_var,**params)
 
     return quadmesh_plot
     # st.bokeh_chart(quadmesh_plot, 'quadmesh.html')
@@ -162,42 +178,66 @@ if nc_file is not None:
             st.session_state.button_nc = False
     
         st.write('Select your parameter and click on apply button')
-        # def disable_apply():
-        #     st.session_state.button_nc = False
+        st.divider()
 
-        sel_var = st.selectbox('Select the netCDF variables',nc_var, on_change=disable_apply)
+        ########################
+        var_col, col_col, tiles_col = st.columns(3)
+        with var_col:
+            sel_var = st.selectbox('Select the netCDF variables',nc_var, on_change=disable_apply)
 
-        lat, lon = trouver_coords_lat_lon(dataset)
-        st.text(f'{lat} and {lon} detected as spatial coordinates')
+            lat, lon = trouver_coords_lat_lon(dataset)
+            st.text(f'{lat} and {lon} detected as spatial coordinates')
 
-        list_tuiles = list(hv.element.tile_sources.keys())
-        list_tuiles = ['CartoDark', 'CartoEco', 'CartoLight', 'CartoMidnight', 'EsriAntarcticImagery', 'EsriArcticImagery', 'EsriArcticOceanBase', 'EsriArcticOceanReference', 'EsriDelormeWorldBaseMap', 'EsriImagery', 'EsriNatGeo', 'EsriOceanBase', 'EsriOceanReference', 'EsriReference', 'EsriTerrain', 'EsriUSATopo', 'EsriWorldBoundariesAndPlaces', 'EsriWorldBoundariesAndPlacesAlternate', 'EsriWorldDarkGrayBase', 'EsriWorldDarkGrayReference', 'EsriWorldHillshade', 'EsriWorldHillshadeDark', 'EsriWorldLightGrayBase', 'EsriWorldLightGrayReference', 'EsriWorldNavigationCharts', 'EsriWorldPhysical', 'EsriWorldShadedRelief', 'EsriWorldStreetMap', 'EsriWorldTopo', 'EsriWorldTransportation', 'OSM', 'OpenTopoMap']
-        sel_tiles = st.selectbox('Select tiles', list_tuiles, index=list_tuiles.index('OpenTopoMap'), on_change=disable_apply)    
+        with col_col:
+            st.link_button('Holoview color','https://holoviews.org/user_guide/Colormaps.html')
+            list_colors = list(hv.plotting.list_cmaps())
+            id_pr_color = list_colors.index('YlGnBu')
+            id_tas_color = list_colors.index('hot_r')
+            list_potential_temp = ['t2m','tas']
+            if ('pr' in sel_var) :
+                sel_index = id_pr_color
+            elif sel_var in list_potential_temp:
+                sel_index = id_tas_color
+            else :
+                sel_index = list_colors.index('blues')
 
-        list_colors = list(hv.plotting.list_cmaps())
-        id_pr_color = list_colors.index('YlGnBu')
-        id_tas_color = list_colors.index('hot_r')
-        list_potential_temp = ['t2m','tas']
-        if ('pr' in sel_var) :
-            sel_index = id_pr_color
-        elif sel_var in list_potential_temp:
-            sel_index = id_tas_color
-        else :
-            sel_index = list_colors.index('blues')
+            sel_color = st.selectbox('Select colors',list_colors, index = sel_index, on_change=disable_apply) 
+            annotated_text(('YlGnBu','Precipitation',"#8ef"),' | ',
+                        ('hot_r','Temperature',"#faa"),' | ',
+                        ('coolwarm','Bias',"#fea"),' | ',
+                        ('_r','To reverse palette',"#afa"),
+                        )
 
-        sel_color = st.selectbox('Select colors',list_colors, index = sel_index, on_change=disable_apply) 
-        annotated_text(('YlGnBu','Precipitation',"#8ef"),' | ',
-                       ('hot_r','Temperature',"#faa"),' | ',
-                       ('coolwarm','Bias',"#fea"),' | ',
-                       ('_r','To reverse palette',"#afa"),
-                       )
+        with tiles_col:
+            toggle_tiles = st.toggle('Add background tiles', value=True, on_change=disable_apply)
+            if toggle_tiles:
+                list_tuiles = list(hv.element.tile_sources.keys())
+                list_tuiles = ['CartoDark', 'CartoEco', 'CartoLight', 'CartoMidnight', 'EsriAntarcticImagery', 'EsriArcticImagery', 'EsriArcticOceanBase', 'EsriArcticOceanReference', 'EsriDelormeWorldBaseMap', 'EsriImagery', 'EsriNatGeo', 'EsriOceanBase', 'EsriOceanReference', 'EsriReference', 'EsriTerrain', 'EsriUSATopo', 'EsriWorldBoundariesAndPlaces', 'EsriWorldBoundariesAndPlacesAlternate', 'EsriWorldDarkGrayBase', 'EsriWorldDarkGrayReference', 'EsriWorldHillshade', 'EsriWorldHillshadeDark', 'EsriWorldLightGrayBase', 'EsriWorldLightGrayReference', 'EsriWorldNavigationCharts', 'EsriWorldPhysical', 'EsriWorldShadedRelief', 'EsriWorldStreetMap', 'EsriWorldTopo', 'EsriWorldTransportation', 'OSM', 'OpenTopoMap']
+                sel_tiles = st.selectbox('Select tiles', list_tuiles, index=list_tuiles.index('OpenTopoMap'), on_change=disable_apply)   
+            else :
+                sel_tiles = st.multiselect('Select map features',['land','coastline','ocean','rivers','lakes'], on_change=disable_apply)
+                
+                df_features = pd.DataFrame(sel_tiles, columns=['Features'])
+                df_features['Precisions [m] - 10/50/110'] = 110
+                df_features.set_index('Features', inplace=True)
+                df_feature_user = st.data_editor(df_features,hide_index=False, disabled=['Features'],use_container_width=True, on_change=disable_apply)
 
-#         stoggle(
-#         "Which palette to choose ?",
-#         "'YlGnBu' for precipitation data, 'hot_r' for temperature, 'coolwarm' for comparison/bias data\n\
-# Add _r to all palette to reverse it")
-        add_vertical_space(1)
+                dict_good = True
+                for index, value in enumerate(df_feature_user['Precisions [m] - 10/50/110']):
+                    if value not in {10, 50, 110}:
+                        st.warning(f'Warning: Value {value} not in 10,50,110, please change the value for {df_feature_user.index[index]}')
+                        dict_good = False
+                if dict_good :
+                    df_feature_user['Precisions [m] - 10/50/110'] = df_feature_user['Precisions [m] - 10/50/110'].astype(str) + 'm'
+                    sel_tiles = df_feature_user.to_dict().popitem()[1]
 
+
+        ########################
+    
+        st.divider() 
+
+
+        ########################
         alpha_col1, alpha_col2 =st.columns(2)
         with alpha_col1:
             choice_alpha = st.toggle('Change transparency ? (plot will not be rasterized anymore)', on_change=disable_apply)
@@ -250,5 +290,17 @@ with st.expander('How to reproduce this plot'):
     )'''
     st.code(code, language='python')
 
+# test = {'coastline':110,
+#         'rivers':110,
+#         }
 
+# test = pd.DataFrame(
+#     [
+#         {"command": "coastline", "rating": 4},
+#         {"command": "rivers", "rating": 5},
+#     ]
+# )
 
+# test_output = st.data_editor(test,num_rows='dynamic', disabled=["command"])
+
+# st.write(dict(test_output))
